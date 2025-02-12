@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solar Analytics Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/justgage@1.2.9/justgage.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,6 +23,11 @@
         th {
             background-color: #f4b400;
             color: white;
+        }
+        #gauge {
+            width: 200px;
+            height: 160px;
+            margin: auto;
         }
     </style>
 </head>
@@ -42,59 +49,81 @@
         </tbody>
     </table>
 
+    <h2>Solar Power Gauge</h2>
+    <div id="gauge"></div>
+
     <script>
-        async function fetchSolarData() {
-            const API_URL = "https://portal.solaranalytics.com.au/api/v3/live_site_data?site_id=266722&last_six=false&last_hour=true&battery_data=true";
+        document.addEventListener("DOMContentLoaded", function () {
+            var gauge = new JustGage({
+                id: "gauge",
+                value: 0, // Default value
+                min: -10, // Adjust as needed
+                max: 8000, // Adjust based on expected range
+                decimals: 1,
+                gaugeWidthScale: 0.6
+            });
 
-            const username = "brjyou@gmail.com";  // Replace with actual username
-            const password = "Sunnyday1!";  // Replace with actual password
-            const credentials = btoa(`${username}:${password}`); // Encode to Base64
+            async function fetchSolarData() {
+                const API_URL = "https://portal.solaranalytics.com.au/api/v3/live_site_data?site_id=266722&last_six=false&last_hour=true&battery_data=true";
 
-            try {
-                const response = await fetch(API_URL, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": "Basic " + credentials,
-                        "Accept": "application/json"
+                const username = "brjyou@gmail.com";  // Replace with actual username
+                const password = "Sunnyday1!";  // Replace with actual password
+                const credentials = btoa(`${username}:${password}`); // Encode to Base64
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: "GET",
+                        headers: {
+                            "Authorization": "Basic " + credentials,
+                            "Accept": "application/json"
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("API request failed: " + response.status);
                     }
-                });
 
-                if (!response.ok) {
-                    throw new Error("API request failed: " + response.status);
+                    const data = await response.json();
+
+                    if (!data || !data.data || data.data.length === 0) {
+                        document.getElementById("solar-data").innerHTML = "<tr><td colspan='3'>No data available</td></tr>";
+                        return;
+                    }
+
+                    // Get the latest entry (last object in the array)
+                    const latestEntry = data.data[data.data.length - 1];
+
+                    // Format data for display
+                    const timestamp = new Date(latestEntry.t_stamp).toLocaleString();
+                    const generated = latestEntry.generated ? latestEntry.generated.toFixed(2) + " W" : "N/A";
+                    const consumed = latestEntry.consumed ? latestEntry.consumed.toFixed(2) + " W" : "N/A";
+
+                    document.getElementById("solar-data").innerHTML = `
+                        <tr>
+                            <td>${timestamp}</td>
+                            <td>${generated}</td>
+                            <td>${consumed}</td>
+                        </tr>
+                    `;
+
+                    // Update the gauge with the generated power
+                    const generatedPower = latestEntry.generated || 0;
+                    gauge.refresh(generatedPower);
+                    
+                    console.log("Updated gauge with generated power:", generatedPower);
+
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                    document.getElementById("solar-data").innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
                 }
-
-                const data = await response.json();
-
-                if (!data || !data.data || data.data.length === 0) {
-                    document.getElementById("solar-data").innerHTML = "<tr><td colspan='3'>No data available</td></tr>";
-                    return;
-                }
-
-                // Get the latest entry (last object in the array)
-                const latestEntry = data.data[data.data.length - 1];
-
-                // Format data for display
-                const timestamp = new Date(latestEntry.t_stamp).toLocaleString();
-                const generated = latestEntry.generated ? latestEntry.generated.toFixed(2) + " W" : "N/A";
-                const consumed = latestEntry.consumed ? latestEntry.consumed.toFixed(2) + " W" : "N/A";
-
-                // Display in table
-                document.getElementById("solar-data").innerHTML = `
-                    <tr>
-                        <td>${timestamp}</td>
-                        <td>${generated}</td>
-                        <td>${consumed}</td>
-                    </tr>
-                `;
-
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                document.getElementById("solar-data").innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
             }
-        }
 
-        // Auto-fetch data on page load
-        fetchSolarData();
+            // Auto-fetch data on page load
+            fetchSolarData();
+
+            // Update the gauge value every 30 seconds
+            setInterval(fetchSolarData, 30000);
+        });
     </script>
 
 </body>
