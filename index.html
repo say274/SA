@@ -58,18 +58,18 @@
     var gaugeGenerated = new JustGage({
         id: "gauge-generated",
         value: 0, // Default value
-        min: -10, // Adjust as needed
-        max: 8000, // Adjust based on expected range
-        decimals: 1,
+        min: -1, // Adjust as needed
+        max: 8, // Adjust based on expected range
+        decimals: 2,
         gaugeWidthScale: 0.6
     });
 
     var gaugeConsumed = new JustGage({
         id: "gauge-consumed",
         value: 0, // Default value
-        min: -10, // Adjust as needed
-        max: 8000, // Adjust based on expected range
-        decimals: 1,
+        min: 0, // Adjust as needed
+        max: 7, // Adjust based on expected range
+        decimals: 2,
         gaugeWidthScale: 0.6
     });
 
@@ -98,6 +98,9 @@
 
             // Get the latest entry (last object in the array)
             const latestEntry = data.data[data.data.length - 1];
+
+            const generatedPower = (latestEntry.generated || 0) / 1000;
+        const consumedPower = (latestEntry.consumed || 0) / 1000;
 
             // Extract generated and consumed values
             const generatedPower = latestEntry.generated || 0;
