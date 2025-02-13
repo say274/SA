@@ -35,6 +35,11 @@
             margin: auto;
         }
 
+        #gauge2 {
+              width: 200px;
+            height: 160px;
+            margin: auto;
+        }
     </style>
 </head>
 <body>
@@ -63,16 +68,6 @@
         document.addEventListener("DOMContentLoaded", function () {
             var gauge = new JustGage({
                 id: "gauge",
-                value: 0, // Default value
-                min: -10, // Adjust as needed
-                max: 8000, // Adjust based on expected range
-                decimals: 1,
-                gaugeWidthScale: 0.6
-            });
-
-            document.addEventListener("DOMContentLoaded", function () {
-            var gauge = new JustGage({
-                id: "gauge2",
                 value: 0, // Default value
                 min: -10, // Adjust as needed
                 max: 8000, // Adjust based on expected range
