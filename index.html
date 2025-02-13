@@ -61,6 +61,7 @@
         min: -1, // Adjust as needed
         max: 8, // Adjust based on expected range
         decimals: 2,
+        label: Energy Produced (kW),
         gaugeWidthScale: 0.6
     });
 
@@ -70,6 +71,7 @@
         min: 0, // Adjust as needed
         max: 7, // Adjust based on expected range
         decimals: 2,
+        label: Energy Consumed
         gaugeWidthScale: 0.6
     });
 
@@ -102,9 +104,7 @@
             const generatedPower = (latestEntry.generated || 0) / 1000;
         const consumedPower = (latestEntry.consumed || 0) / 1000;
 
-            // Extract generated and consumed values
-            const generatedPower = latestEntry.generated || 0;
-            const consumedPower = latestEntry.consumed || 0;
+        
 
             // Update both gauges
             gaugeGenerated.refresh(generatedPower);
