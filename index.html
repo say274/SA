@@ -135,10 +135,13 @@
         }
     }
 
-     setTimeout(() => {
-    document.querySelector("#gauge-generated svg text.justgage-value").setAttribute("fill", "white");
-    document.querySelector("#gauge-consumed svg text.justgage-value").setAttribute("fill", "white");
-}, 500);
+    setTimeout(() => {
+    let generatedValue = document.querySelector("#gauge-generated text.justgage-value");
+    let consumedValue = document.querySelector("#gauge-consumed text.justgage-value");
+
+    if (generatedValue) generatedValue.setAttribute("fill", "white");
+    if (consumedValue) consumedValue.setAttribute("fill", "white");
+}, 1000); // Wait 1 second to allow JustGage to render
 
     // Auto-fetch data on page load
     fetchSolarData();
