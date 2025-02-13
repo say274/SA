@@ -15,19 +15,22 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-             background-color: #f4b400;
+        }
+        table {
+            width: 50%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f4b400;
             color: white;
         }
-        
-    
         #gauge {
             width: 200px;
-            height: 160px;
-            margin: auto;
-        }
-
-        #gauge2 {
-              width: 200px;
             height: 160px;
             margin: auto;
         }
@@ -35,13 +38,24 @@
 </head>
 <body>
 
-    
-  
+    <h2>Solar Analytics Live Data</h2>
+    <button onclick="fetchSolarData()">Refresh Data</button>
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Power Generated (W)</th>
+                <th>Power Consumed (W)</th>
+            </tr>
+        </thead>
+        <tbody id="solar-data">
+            <tr><td colspan="3">Loading data...</td></tr>
+        </tbody>
+    </table>
     <h2>Solar Power Gauge</h2>
     
   
     <div id="gauge"></div>
-        <div id="gauge2"></div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -101,8 +115,6 @@
                     gauge.refresh(generatedPower);
                     
                     console.log("Updated gauge with generated power:", generatedPower);
-
-        
 
                 } catch (error) {
                     console.error("Error fetching data:", error);
