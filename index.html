@@ -135,6 +135,11 @@
         }
     }
 
+     setTimeout(() => {
+    document.querySelector("#gauge-generated svg text.justgage-value").setAttribute("fill", "white");
+    document.querySelector("#gauge-consumed svg text.justgage-value").setAttribute("fill", "white");
+}, 500);
+
     // Auto-fetch data on page load
     fetchSolarData();
 
