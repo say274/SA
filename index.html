@@ -102,19 +102,6 @@
             const generatedPower = latestEntry.generated || 0;
             const consumedPower = latestEntry.consumed || 0;
 
-            // Format data for display
-            const timestamp = new Date(latestEntry.t_stamp).toLocaleString();
-            const generated = latestEntry.generated ? latestEntry.generated.toFixed(2) + " W" : "N/A";
-            const consumed = latestEntry.consumed ? latestEntry.consumed.toFixed(2) + " W" : "N/A";
-
-          
-                <tr>
-                    <td>${timestamp}</td>
-                    <td>${generated}</td>
-                    <td>${consumed}</td>
-                </tr>
-            ;
-
             // Update both gauges
             gaugeGenerated.refresh(generatedPower);
             gaugeConsumed.refresh(consumedPower);
