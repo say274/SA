@@ -93,10 +93,7 @@
 
             const data = await response.json();
 
-            if (!data || !data.data || data.data.length === 0) {
-                document.getElementById("solar-data").innerHTML = "<tr><td colspan='3'>No data available</td></tr>";
-                return;
-            }
+           
 
             // Get the latest entry (last object in the array)
             const latestEntry = data.data[data.data.length - 1];
@@ -110,7 +107,7 @@
             const generated = latestEntry.generated ? latestEntry.generated.toFixed(2) + " W" : "N/A";
             const consumed = latestEntry.consumed ? latestEntry.consumed.toFixed(2) + " W" : "N/A";
 
-            document.getElementById("solar-data").innerHTML = `
+          
                 <tr>
                     <td>${timestamp}</td>
                     <td>${generated}</td>
