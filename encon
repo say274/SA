@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Analytics Data</title>
+
+    <!-- Load Required Libraries -->
+   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.4/raphael-min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.2.9/justgage.min.js"></script>
+
+    
+
+    <style>
+
+        
+        
+        body {
+            font-family: Oswald, sans-serif;
+            text-align: center;
+            background-color: transparent;
+        }
+        table {
+            width: 50%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f4b400;
+            color: white;
+        }
+
+       
+        #gauge-consumed .justgage-title {
+        fill: white !important; /* Forces title text to be white */
+            padding: 0;
+        }
+        
+        #gauge-consumed svg text {
+        fill: white !important; /* Forces text color to white */
+             padding: 0;
+        }
+
+      
+ #gauge-consumed {
+    width: 300; /* Adjust to reduce size */
+    margin: 0; /* Remove extra space */
+    height: auto;
+    padding: 0
+}
+
+        tspan {
+    font-size: 44px !important; /* Makes the text larger */;
+        }
+        
+    </style>
+</head>
+<body>
+
+  
+    
+  <div style="display: flex; justify-content: center; gap: 50px;">
+ 
+    <div>
+        <h3>Power Consumed</h3> <!-- Title above gauge -->
+        <div id="gauge-consumed"></div>
+    </div>
+</div>
+
+
+    <script>
+ document.addEventListener("DOMContentLoaded", function () {
+    // Initialize both gauges
+   
+
+    var gaugeConsumed = new JustGage({
+        id: "gauge-consumed",
+        value: 0, // Default value
+        min: 0, // Adjust as needed
+        max: 5, // Adjust based on expected range
+        decimals: 1,
+        title: "Energy Consumed",
+        gaugeWidthScale: 0.6,
+        labelFontColor: "#ffffff",
+        titleFontColor: "ffffff"
+    });
+
+    async function fetchSolarData() {
+        const API_URL = "https://portal.solaranalytics.com.au/api/v3/live_site_data?site_id=266722&last_six=true&last_hour=false&battery_data=false";
+        const username = "brjyou@gmail.com";  // Replace with actual username
+        const password = "Sunnyday1!";  // Replace with actual password
+        const credentials = btoa(`${username}:${password}`); // Encode to Base64
+
+        try {
+            const response = await fetch(API_URL, {
+                method: "GET",
+                headers: {
+                    "Authorization": "Basic " + credentials,
+                    "Accept": "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("API request failed: " + response.status);
+            }
+
+            const data = await response.json();
+
+           
+
+            // Get the latest entry (last object in the array)
+            const latestEntry = data.data[data.data.length - 1];
+
+            const generatedPower = (latestEntry.generated || 0) / 1000;
+        const consumedPower = (latestEntry.consumed || 0) / 1000;
+
+        
+
+            // Update both gauges
+            
+            gaugeConsumed.refresh(consumedPower);
+
+            console.log("Updated gauges - Generated:", generatedPower, "Consumed:", consumedPower);
+
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            document.getElementById("last-updated").innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
+        }
+    }
+
+    setTimeout(() => {
+    let generatedValue = document.querySelector("#gauge-generated text.justgage-value");
+    let consumedValue = document.querySelector("#gauge-consumed text.justgage-value");
+
+    if (generatedValue) generatedValue.setAttribute("fill", "white");
+    if (consumedValue) consumedValue.setAttribute("fill", "white");
+}, 1000); // Wait 1 second to allow JustGage to render
+
+    // Auto-fetch data on page load
+    fetchSolarData();
+
+    // Update the gauge values every 30 seconds
+    setInterval(fetchSolarData, 30000);
+});
+</script>
+
+</body>
+</html>
