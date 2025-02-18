@@ -52,11 +52,10 @@
 
       
 #gauge-generated, {
-    width: 120; /* Adjust to reduce size */
+    width: 100; /* Adjust to reduce size */
     margin: 0; /* Remove extra space */
-    height: 40;
+    height: auto;
     padding: 10;
-
 }
 
         tspan {
@@ -70,7 +69,13 @@
 
   
     
- 
+  <div style="display: flex; justify-content: center; gap: 50px;">
+    <div>
+        <h3>Power Generated</h3> <!-- Title above gauge -->
+        <div id="gauge-generated"></div>
+    </div>
+    
+</div>
 
 
     <script>
