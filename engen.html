@@ -6,153 +6,122 @@
     <title>Solar Analytics Data</title>
 
     <!-- Load Required Libraries -->
-   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.4/raphael-min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.2.9/justgage.min.js"></script>
-
-    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.4/raphael-min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.2.9/justgage.min.js"></script>
 
     <style>
-
-        #gauge-generated text {
-    fill: white !important; /* Force white text */
-}
-        
         body {
             font-family: Oswald, sans-serif;
             text-align: center;
             background-color: transparent;
         }
-        table {
-            width: 100px;
-            margin: 20px auto;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
-        th {
-            background-color: #f4b400;
-            color: white;
-        }
-
-       
-
-         
         
-        #gauge-generated .justgage-title {
-        fill: white !important; /* Forces title text to be white */
-            padding: 0;
-        }
-        
-        #gauge-generated svg text,
-    {fill: white !important; /* Forces text color to white */
-             padding: 0;
+        #gauge-generated {
+            width: 150px;
+            height: 70px;
+            margin: 0 auto; /* Center the gauge */
         }
 
-      
-#gauge-generated, {
-    width: 100; /* Adjust to reduce size */
-    margin: 0; /* Remove extra space */
-    height: auto;
-    padding: 10;
-}
-
-        tspan {
-    font-size: 44px !important; /* Makes the text larger */;
-            color: white;
+        /* Ensure gauge text appears white */
+        #gauge-generated text.justgage-value {
+            fill: white !important;
+            font-size: 44px !important; /* Set font size */
         }
-        
+
+        /* Force all text inside the gauge to be white */
+        svg text {
+            fill: white !important;
+        }
+
+        /* Container */
+        .gauge-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
 
-  
-    
-  <div style="display: flex; justify-content: center; gap: 50px;">
-    <div>
-        <h3>Power Generated</h3> <!-- Title above gauge -->
+    <div class="gauge-container">
         <div id="gauge-generated"></div>
     </div>
-    
-</div>
-
 
     <script>
- document.addEventListener("DOMContentLoaded", function () {
-    // Initialize both gauges
-    var gaugeGenerated = new JustGage({
-        id: "gauge-generated",
-        value: 0, // Default value
-        min: -1, // Adjust as needed
-        max: 8, // Adjust based on expected range
-        decimals: 2,
-        title: "Energy Produced",
-        gaugeWidthScale: 0.6,
-       
-        titleFontColor: "#ffffff",
-        levelColors: ["#ff0000", "#ffff00", "#00ff00"]
-    });
-
-   
-
-    async function fetchSolarData() {
-        const API_URL = "https://portal.solaranalytics.com.au/api/v3/live_site_data?site_id=266722&last_six=true&last_hour=false&battery_data=false";
-        const username = "brjyou@gmail.com";  // Replace with actual username
-        const password = "Sunnyday1!";  // Replace with actual password
-        const credentials = btoa(`${username}:${password}`); // Encode to Base64
-
-        try {
-            const response = await fetch(API_URL, {
-                method: "GET",
-                headers: {
-                    "Authorization": "Basic " + credentials,
-                    "Accept": "application/json"
-                }
+        document.addEventListener("DOMContentLoaded", function () {
+            // Initialize JustGage without a title
+            var gaugeGenerated = new JustGage({
+                id: "gauge-generated",
+                value: 0,
+                min: -1,
+                max: 8,
+                decimals: 2,
+                gaugeWidthScale: 0.6,
+                title: "", // ✅ No title
+                titleFontColor: "transparent", // ✅ Hide title completely
+                levelColors: ["#ff0000", "#ffff00", "#00ff00"]
             });
 
-            if (!response.ok) {
-                throw new Error("API request failed: " + response.status);
+            async function fetchSolarData() {
+                const API_URL = "https://portal.solaranalytics.com.au/api/v3/live_site_data?site_id=266722&last_six=true&last_hour=false&battery_data=false";
+                const username = "brjyou@gmail.com";  // ⚠️ Replace with actual username
+                const password = "Sunnyday1!";  // ⚠️ Replace with actual password (NOT SECURE)
+                const credentials = btoa(`${username}:${password}`); // Encode to Base64
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: "GET",
+                        headers: {
+                            "Authorization": "Basic " + credentials,
+                            "Accept": "application/json"
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("API request failed: " + response.status);
+                    }
+
+                    const data = await response.json();
+
+                    // Ensure `data.data` exists before accessing properties
+                    const latestEntry = data.data?.[data.data.length - 1];
+
+                    if (!latestEntry) {
+                        throw new Error("No data available.");
+                    }
+
+                    const generatedPower = (latestEntry.generated ?? 0) / 1000; // Convert to kW
+
+                    // Update the gauge with the new data
+                    gaugeGenerated.refresh(generatedPower);
+
+                    console.log("Updated gauge - Generated:", generatedPower);
+
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                }
             }
 
-            const data = await response.json();
+            // Force text to remain white dynamically
+            function forceWhiteText() {
+                let generatedValue = document.querySelector("#gauge-generated text.justgage-value");
+                if (generatedValue) {
+                    generatedValue.setAttribute("fill", "white");
+                    generatedValue.setAttribute("font-size", "44px"); // Ensure font size stays at 44px
+                }
+            }
 
-           
+            // Observe DOM changes to ensure the text stays white
+            const observer = new MutationObserver(forceWhiteText);
+            observer.observe(document.body, { childList: true, subtree: true });
 
-            // Get the latest entry (last object in the array)
-            const latestEntry = data.data[data.data.length - 1];
+            // Auto-fetch data on page load
+            fetchSolarData();
 
-            const generatedPower = (latestEntry.generated || 0) / 1000;
-        const consumedPower = (latestEntry.consumed || 0) / 1000;
-
-        
-
-            // Update both gauges
-            gaugeGenerated.refresh(generatedPower);
-      
-
-            console.log("Updated gauges - Generated:", generatedPower);
-
-        } catch (error) {
-            console.error("Error fetching data:", error);
-            document.getElementById("last-updated").innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
-        }
-    }
-
-    setTimeout(() => {
-    let generatedValue = document.querySelector("#gauge-generated text.justgage-value");
-  
-    if (generatedValue) generatedValue.setAttribute("fill", "white");
-    
-}, 1000); // Wait 1 second to allow JustGage to render
-
-    // Auto-fetch data on page load
-    fetchSolarData();
-
-    // Update the gauge values every 30 seconds
-    setInterval(fetchSolarData, 30000);
-});
-</script>
+            // Update the gauge values every 30 seconds
+            setInterval(fetchSolarData, 30000);
+        });
+    </script>
 
 </body>
 </html>
